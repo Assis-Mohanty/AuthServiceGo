@@ -11,6 +11,8 @@ import (
 type UserRepository interface {
 	Create() (*models.User,error)
 	GetById() (*models.User,error)
+	GetAllUsers()([]*models.User,error)
+	DeleteById(id int64) error
 }
 
 type UserRepositoryImpl struct {
@@ -59,4 +61,45 @@ func (u *UserRepositoryImpl) Create()(*models.User,error){
 	fmt.Println("User Created with id:",id)
 	user.Id=id
 	return user,nil
+}
+
+
+func (u *UserRepositoryImpl) GetAllUsers()([] *models.User,error){
+	query:="SELECT id,username,email FROM users"
+	rows,err:=u.db.Query(query)
+	if err!=nil{
+		fmt.Println("Fetching all users")
+		return nil,err
+	}
+	defer rows.Close()
+	var users[] *models.User
+	for rows.Next(){
+		user:=&models.User{}
+		err:=rows.Scan(&user.Id,&user.Username,&user.Email)
+		if err!=nil{
+			return nil,err
+		}
+		users = append(users, user)
+	}
+	if err:=rows.Err();err!=nil{
+		return nil,err
+	}
+	for _, u := range users {
+	fmt.Printf("%+v\n", *u)
+	}
+	return users,err
+}
+
+func (u *UserRepositoryImpl) DeleteById(id int64) error{
+	query:=`delete from users where id=?`
+	result,err:=u.db.Exec(query,id)
+	if err!=nil{
+		return err
+	}
+	userId,err:=result.LastInsertId()
+	if err!=nil{
+		return err
+	}
+	fmt.Println("USer deleted with id:",userId)
+	return nil
 }

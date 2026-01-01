@@ -8,6 +8,8 @@ import (
 type UserService interface {
 	Create() (*models.User,error)
 	GetById() (*models.User, error)
+	GetAllUsers()([]*models.User,error)
+	DeleteById(id int64) error
 }
 
 type UserServiceImpl struct {
@@ -26,4 +28,12 @@ func (u *UserServiceImpl) GetById() (*models.User, error){
 
 func (u *UserServiceImpl) Create() (*models.User,error){
 	return u.userRepository.Create()
+}
+
+func (u *UserServiceImpl) GetAllUsers() ([]*models.User,error){
+	return u.userRepository.GetAllUsers()
+}
+
+func (u *UserServiceImpl) DeleteById(id int64) error{
+	return u.userRepository.DeleteById(id)
 }
