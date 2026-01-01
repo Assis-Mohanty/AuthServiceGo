@@ -4,12 +4,13 @@ import (
 	"authservice/models"
 	"database/sql"
 	"fmt"
+
 )
 
 // import "database/sql"
 
 type UserRepository interface {
-	Create() (*models.User,error)
+	Create(username string,email string,password string) (*models.User,error)
 	GetById() (*models.User,error)
 	GetAllUsers()([]*models.User,error)
 	DeleteById(id int64) error
@@ -45,21 +46,25 @@ func (u *UserRepositoryImpl) GetById() (*models.User ,error) {
 	return user,nil
 }
 
-func (u *UserRepositoryImpl) Create()(*models.User,error){
-	query:="INSERT INTO users (username,email,password) VALUES (?,?,?)"
-	user:=&models.User{}
+func (u *UserRepositoryImpl) Create(username string,email string,password string)(*models.User,error){
+	query:=`INSERT INTO users (username,email,password) VALUES (?,?,?)`
 	result, err := u.db.Exec(
-		query,
-		"kakdsnmkamsd","aisdalsqsda","asdlmalmsdl")
+		query,username,email,password)
 	if err!=nil{
+		fmt.Println("User Creation failed")
 		return nil,err
 	}
 	id,err:=result.LastInsertId()
 	if err!=nil{
 		return nil,err
 	}
-	fmt.Println("User Created with id:",id)
-	user.Id=id
+	user:=&models.User{
+		Id: id,
+		Username: username,
+		Email: email,
+		Password: password,
+	}
+	fmt.Println("User created",user.Id,user.Username,user.Email,user.Password)
 	return user,nil
 }
 

@@ -2,9 +2,17 @@ package controllers
 
 import (
 	"authservice/services"
+	"encoding/json"
 	"net/http"
 	"strconv"
 )
+
+type CreateRequestType struct{
+	Username string `json:"username"`
+	Email string `json:"email"`
+	Password string `json:"password"`
+
+}
 
 type UserController struct {
 	UserService services.UserService
@@ -22,8 +30,19 @@ func (uc *UserController) GetUserById(w http.ResponseWriter,r *http.Request){
 }
 
 func (uc *UserController) Create(w http.ResponseWriter,r *http.Request){
-	uc.UserService.Create()
-	w.Write([]byte("User creation endpoint"))
+	var req CreateRequestType
+	if err:=json.NewDecoder(r.Body).Decode(&req);err !=nil{
+		http.Error(w,"invalid request body",http.StatusBadRequest)
+	}
+	username:=req.Username
+	password:=req.Password
+	email:=req.Email
+	if username=="" || email ==""|| password==""{
+		http.Error(w,"invalid request body",http.StatusBadRequest)
+		return 
+	}
+	uc.UserService.Create(username,email,password)
+	w.Write([]byte("User creation endpoint"))	
 }
 
 func (uc *UserController) GetAllUsers(w http.ResponseWriter,r *http.Request){
