@@ -11,9 +11,10 @@ import (
 
 type UserRepository interface {
 	Create(username string,email string,password string) (*models.User,error)
-	GetById() (*models.User,error)
+	GetById(id int64) (*models.ResponseUserDTO,error)
 	GetAllUsers()([]*models.User,error)
 	DeleteById(id int64) error
+	GetUserByEmail(email string )(*models.User,error)
 }
 
 type UserRepositoryImpl struct {
@@ -26,11 +27,11 @@ func NewUserRepository(_db *sql.DB) UserRepository{
 	}
 }
 
-func (u *UserRepositoryImpl) GetById() (*models.User ,error) {
+func (u *UserRepositoryImpl) GetById(id int64) (*models.ResponseUserDTO ,error) {
 	fmt.Println("Fetching User in UserRepository")
 	query:="SELECT id,username,email,created_at,updated_at FROM users WHERE id=?"
-	row:=u.db.QueryRow(query,1)
-	user:=&models.User{}
+	row:=u.db.QueryRow(query,id)
+	user:=&models.ResponseUserDTO{}
 	err:=row.Scan(&user.Id,&user.Username,&user.Email,&user.CreatedAt,&user.UpdatedAt)
 
 	if err!= nil{
@@ -107,4 +108,23 @@ func (u *UserRepositoryImpl) DeleteById(id int64) error{
 	}
 	fmt.Println("USer deleted with id:",userId)
 	return nil
+}
+
+
+func (u * UserRepositoryImpl) GetUserByEmail(email string )(*models.User,error){
+	query:=`SELECT id,username,email,password from users where email=?`
+	row:=u.db.QueryRow(query,email)
+	user:=&models.User{}
+	err:=row.Scan(&user.Id, &user.Username, &user.Email, &user.Password)
+	if err!=nil{
+		if err==sql.ErrNoRows{
+			fmt.Println("No user found with email",email)
+			return nil,err
+		}else{
+			fmt.Println("Error scanning user",err)
+			 return nil,err
+		}
+		
+	}
+	return user,nil
 }

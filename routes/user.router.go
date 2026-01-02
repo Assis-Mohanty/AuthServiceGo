@@ -17,8 +17,12 @@ func NewUserRouter(_userController *controllers.UserController) Router{
 }
 
 func (ur *UserRouter) Register(r chi.Mux){
-	r.Get("/profile",ur.userController.GetUserById)
+	r.Get("/profile/{id}",ur.userController.GetUserById)
 	r.Post("/create",ur.userController.Create)
 	r.Get("/getallprofiles",ur.userController.GetAllUsers)
 	r.Delete("/profile/{id}",ur.userController.DeleteById)
+	r.Get("/getbyemail/{email}",ur.userController.GetUserByEmail)
+	r.Post("/verify",ur.userController.VerifyEmailAndPassword)
+
+
 }

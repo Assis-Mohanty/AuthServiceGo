@@ -19,6 +19,7 @@ func SetUpDb()(*sql.DB,error){
 	cfg.Net=env.GetString("DB_NETWORK","tcp")
 	cfg.Addr=env.GetString("DB_ADDRESS","127.0.0.1:3306")
 	cfg.DBName=env.GetString("DB_NAME","usersgo")
+	cfg.ParseTime=true
 	var err error
 	fmt.Println(cfg.FormatDSN())
 	db,err = sql.Open("mysql",cfg.FormatDSN())
