@@ -1,8 +1,12 @@
 package controllers
 
 import (
+	"authservice/models"
 	"authservice/services"
+	"authservice/utils"
 	"encoding/json"
+	"fmt"
+
 	// "log"
 	"net/http"
 	"strconv"
@@ -10,7 +14,7 @@ import (
 
 type CreateRequestType struct{
 	Username string `json:"username"`
-	Email string `json:"email"`
+	Email string `json:"email" validate:"required,email"`
 	Password string `json:"password"`
 
 }
@@ -35,9 +39,15 @@ func (uc *UserController) GetUserById(w http.ResponseWriter,r *http.Request){
 		http.Error(w,"id is not a valid Integer",http.StatusBadRequest)
 	}
 	user,err:=uc.UserService.GetById(idInt)
+	response:=map[string]any{
+		"message":"Succesfully fetched users",
+		"success":true,
+		"error":nil,
+		"data":user,
+	}
 	w.Header().Set("Content-Type","application/json")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(user); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
         http.Error(w, "failed to encode response", http.StatusInternalServerError)
         return
     }
@@ -92,7 +102,16 @@ func (uc *UserController) Create(w http.ResponseWriter,r *http.Request){
 
 
 func (uc *UserController) GetAllUsers(w http.ResponseWriter,r *http.Request){
-	uc.UserService.GetAllUsers()
+	result,err:=uc.UserService.GetAllUsers()
+	if err!=nil{
+		fmt.Println("Fetching all users failed")
+		http.Error(w,"Fetching all users failed",http.StatusBadGateway)
+		response:=utils.CreateResponse("ajsndjad",false,err,nil)
+		utils.WriteJson(w,http.StatusOK,response)
+	}
+	response:=utils.CreateResponse("Successfully fetched all users",true,nil,result)
+	utils.WriteJson(w,http.StatusOK,response)
+
 	w.Write([]byte("Fetching all users"))
 }
 
@@ -116,12 +135,26 @@ func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
 	w.Write([]byte("Fetching all users"))
 }
 
-func (uc *UserController) VerifyEmailAndPassword(w http.ResponseWriter,r *http.Request){
-	var req CreateRequestType
-	if err:=json.NewDecoder(r.Body).Decode(&req);err !=nil{
-		http.Error(w,"invalid request body",http.StatusBadRequest)
+func (uc *UserController) Login(w http.ResponseWriter,r *http.Request){
+	var req models.LoginRequestType
+	// if err:=json.NewDecoder(r.Body).Decode(&req);err !=nil{
+	// 	http.Error(w,"invalid request body",http.StatusBadRequest)
+	// }
+	jsonErr:=utils.ReadJson(r ,&req); 
+	if jsonErr !=nil{
+		w.Write([]byte("Failed reading Json"))
+		utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Failed reading Json",jsonErr)
+		return
+	}
+
+	if validatorErr:=utils.Validator.Struct(req);validatorErr!=nil{
+		w.Write([]byte("Invalid input data"))
+		utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Invalid input data",jsonErr)
+		return
 	}
 	password:=req.Password
 	email:=req.Email
-	uc.UserService.VerifyEmailAndPassword(email,password)
+	data:=uc.UserService.Login(email,password)
+	utils.WriteJsonSuccessResponse(w,http.StatusOK,"Login Succesfull",data)
+	
 }

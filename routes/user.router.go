@@ -22,7 +22,7 @@ func (ur *UserRouter) Register(r chi.Mux){
 	r.Get("/getallprofiles",ur.userController.GetAllUsers)
 	r.Delete("/profile/{id}",ur.userController.DeleteById)
 	r.Get("/getbyemail/{email}",ur.userController.GetUserByEmail)
-	r.Post("/verify",ur.userController.VerifyEmailAndPassword)
+	r.Post("/verify",ur.userController.Login)
 
 
 }

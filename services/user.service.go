@@ -17,7 +17,7 @@ type UserService interface {
 	GetAllUsers()([]*models.User,error)
 	DeleteById(id int64) error
 	GetUserByEmail(email string )(*models.User,error)
-	VerifyEmailAndPassword(email string ,password string) string
+	Login(email string ,password string) string
 	// GenerateJWT() string
 }
 
@@ -49,8 +49,11 @@ func (u *UserServiceImpl) DeleteById(id int64) error{
 	return u.userRepository.DeleteById(id)
 }
 
-func GenerateJWT() string{
-	jwt:=jwt.New(jwt.SigningMethodHS256)
+func GenerateJWT(email string , password string) string{
+	jwt:=jwt.NewWithClaims(jwt.SigningMethodHS256,jwt.MapClaims{
+		"email":email,
+		"password":password,
+	})
 	string:=os.Getenv("JWT_KEY")
 	jwtString,err:=jwt.SignedString([]byte(string) )
 	if err!=nil{
@@ -63,7 +66,7 @@ func (u *UserServiceImpl) GetUserByEmail(email string )(*models.User,error){
 	return u.userRepository.GetUserByEmail(email)
 }
 
-func (u *UserServiceImpl) VerifyEmailAndPassword(email string ,password string) string{
+func (u *UserServiceImpl) Login(email string ,password string) string{
 	user,err:=u.userRepository.GetUserByEmail(email)
 	if err==nil{
 		fmt.Println("user fetched successfully ",user.Id,user.Username,user.Email,user.Password)
@@ -71,7 +74,7 @@ func (u *UserServiceImpl) VerifyEmailAndPassword(email string ,password string) 
 	result:=utils.CheckPasswordHash(user.Password,password)
 	if result{
 		fmt.Println("Password is Correct")
-		jwt:=GenerateJWT()
+		jwt:=GenerateJWT(email,password)
 		fmt.Println(jwt)
 		return string(jwt)
 	}

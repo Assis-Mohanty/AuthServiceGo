@@ -19,3 +19,9 @@ type ResponseUserDTO struct {
 	CreatedAt time.Time 
 	UpdatedAt time.Time
 }
+
+
+type LoginRequestType struct{
+	Email string `json:"email" validate:"required,email"`
+	Password string 
+}

@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,4 +22,14 @@ func CheckPasswordHash(hashedPassword string ,password string )bool{
 		return false
 	}
 	return true 
+}
+
+var Validator *validator.Validate
+
+func init(){
+	Validator=NewValidator()
+}
+
+func NewValidator()*validator.Validate{
+	return validator.New(validator.WithRequiredStructEnabled())
 }
