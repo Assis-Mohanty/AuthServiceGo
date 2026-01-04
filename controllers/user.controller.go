@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"authservice/middlewares"
 	"authservice/models"
 	"authservice/services"
 	"authservice/utils"
@@ -10,12 +11,6 @@ import (
 	"strconv"
 )
 
-type CreateRequestType struct{
-	Username string `json:"username"`
-	Email string `json:"email" validate:"required,email"`
-	Password string `json:"password"`
-
-}
 
 type UserController struct {
 	UserService services.UserService
@@ -53,9 +48,9 @@ func (uc *UserController) GetUserById(w http.ResponseWriter,r *http.Request){
 
 
 func (uc *UserController) Create(w http.ResponseWriter,r *http.Request){
-	var req CreateRequestType
-	if err:=json.NewDecoder(r.Body).Decode(&req);err !=nil{
-		http.Error(w,"invalid request body",http.StatusBadRequest)
+	req,ok:=r.Context().Value(middlewares.CreateRequestkeyStruct).(*models.CreateRequestType)
+	if !ok || req==nil{
+		http.Error(w,"Creating user failed , invalid body",http.StatusBadRequest)
 	}
 	username:=req.Username
 	password:=req.Password
@@ -109,7 +104,11 @@ func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
 
 func (uc *UserController) Login(w http.ResponseWriter,r *http.Request){
 	fmt.Println("asda")
-	var req models.LoginRequestType
+	
+	req,ok:=r.Context().Value(middlewares.LoginKeyStruct).(*models.LoginRequestType)
+	if !ok || req==nil{
+		http.Error(w,"Creating user failed , invalid body",http.StatusBadRequest)
+	}
 	password:=req.Password
 	email:=req.Email
 	fmt.Println("asdaqqq")
