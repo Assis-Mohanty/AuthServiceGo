@@ -2,6 +2,7 @@ package routes
 
 import (
 	"authservice/controllers"
+	"authservice/middlewares"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -22,7 +23,5 @@ func (ur *UserRouter) Register(r chi.Mux){
 	r.Get("/getallprofiles",ur.userController.GetAllUsers)
 	r.Delete("/profile/{id}",ur.userController.DeleteById)
 	r.Get("/getbyemail/{email}",ur.userController.GetUserByEmail)
-	r.Post("/verify",ur.userController.Login)
-
-
+	r.With(middlewares.UserLoginMiddleware).Post("/verify",ur.userController.Login)
 }

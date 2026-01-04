@@ -1,8 +1,7 @@
 package config
 
 import (
-	// "database/sql"
-	env "authservice/config"
+	"authservice/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -14,11 +13,11 @@ var db *sql.DB
 
 func SetUpDb()(*sql.DB,error){
 	cfg:=mysql.NewConfig()
-	cfg.User=env.GetString("DB_USER","root")
-	cfg.Passwd=env.GetString("DB_PASSWORD","qqqq")
-	cfg.Net=env.GetString("DB_NETWORK","tcp")
-	cfg.Addr=env.GetString("DB_ADDRESS","127.0.0.1:3306")
-	cfg.DBName=env.GetString("DB_NAME","usersgo")
+	cfg.User=config.GetString("DB_USER","root")
+	cfg.Passwd=config.GetString("DB_PASSWORD","qqqq")
+	cfg.Net=config.GetString("DB_NETWORK","tcp")
+	cfg.Addr=config.GetString("DB_ADDRESS","127.0.0.1:3306")
+	cfg.DBName=config.GetString("DB_NAME","usersgo")
 	cfg.ParseTime=true
 	var err error
 	fmt.Println(cfg.FormatDSN())

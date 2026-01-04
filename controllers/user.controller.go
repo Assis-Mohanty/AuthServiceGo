@@ -6,8 +6,6 @@ import (
 	"authservice/utils"
 	"encoding/json"
 	"fmt"
-
-	// "log"
 	"net/http"
 	"strconv"
 )
@@ -52,36 +50,6 @@ func (uc *UserController) GetUserById(w http.ResponseWriter,r *http.Request){
         return
     }
 }
-
-// func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
-// 	log.Println("aksnmdkam")
-//     idStr := r.PathValue("id")
-//     if idStr == "" {
-//         http.Error(w, "missing id", http.StatusBadRequest)
-//         return
-//     }
-
-//     idInt, err := strconv.ParseInt(idStr, 10, 64)
-//     if err != nil {
-//         http.Error(w, "id must be a valid integer", http.StatusBadRequest)
-//         return
-//     }
-
-//     user, err := uc.UserService.GetById(idInt)
-//     if err != nil {
-//         http.Error(w, "user not found", http.StatusNotFound)
-//         return
-//     }
-
-//     w.Header().Set("Content-Type", "application/json")
-//     w.WriteHeader(http.StatusOK)
-
-//     if err := json.NewEncoder(w).Encode(user); err != nil {
-//         // at this point headers are already sent, just log
-//         log.Println("encode error:", err)
-//         return
-//     }
-// }
 
 
 func (uc *UserController) Create(w http.ResponseWriter,r *http.Request){
@@ -131,30 +99,26 @@ func (uc *UserController) DeleteById(w http.ResponseWriter,r *http.Request){
 
 func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
 	email:=r.PathValue("email")
-	uc.UserService.GetUserByEmail(email)
+	user,err:=uc.UserService.GetUserByEmail(email)
+	if err!=nil{
+		w.Write([]byte("Fetching by email failed"))
+	}
+	utils.WriteJsonSuccessResponse(w,http.StatusOK,"Fetched user by email succesfully",user)
 	w.Write([]byte("Fetching all users"))
 }
 
 func (uc *UserController) Login(w http.ResponseWriter,r *http.Request){
+	fmt.Println("asda")
 	var req models.LoginRequestType
-	// if err:=json.NewDecoder(r.Body).Decode(&req);err !=nil{
-	// 	http.Error(w,"invalid request body",http.StatusBadRequest)
-	// }
-	jsonErr:=utils.ReadJson(r ,&req); 
-	if jsonErr !=nil{
-		w.Write([]byte("Failed reading Json"))
-		utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Failed reading Json",jsonErr)
-		return
-	}
-
-	if validatorErr:=utils.Validator.Struct(req);validatorErr!=nil{
-		w.Write([]byte("Invalid input data"))
-		utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Invalid input data",jsonErr)
-		return
-	}
 	password:=req.Password
 	email:=req.Email
+	fmt.Println("asdaqqq")
 	data:=uc.UserService.Login(email,password)
+	if data==""{
+		fmt.Println("error service didnt not generate jwt")
+		utils.WriteJsonErrorResponse(w, http.StatusUnauthorized, "Invalid credentials", nil)
+		return
+	}
+	fmt.Println("asdaqqqwwwqq")
 	utils.WriteJsonSuccessResponse(w,http.StatusOK,"Login Succesfull",data)
-	
 }

@@ -17,6 +17,7 @@ func GenerateHashPassword(password string) (string, error) {
 
 func CheckPasswordHash(hashedPassword string ,password string )bool{
 	err:=bcrypt.CompareHashAndPassword([]byte(hashedPassword),[]byte(password))
+	
 	if err!=nil{
 		fmt.Println("Password do not match the hashedPassword")
 		return false
@@ -33,3 +34,4 @@ func init(){
 func NewValidator()*validator.Validate{
 	return validator.New(validator.WithRequiredStructEnabled())
 }
+
