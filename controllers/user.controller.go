@@ -93,13 +93,19 @@ func (uc *UserController) DeleteById(w http.ResponseWriter,r *http.Request){
 
 
 func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
-	email:=r.PathValue("email")
-	user,err:=uc.UserService.GetUserByEmail(email)
-	if err!=nil{
-		w.Write([]byte("Fetching by email failed"))
+	email, ok := r.Context().Value(middlewares.JwtContextKey).(string)
+	if !ok || email == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusUnauthorized, "Invalid or missing email in token", nil)
+		return
 	}
-	utils.WriteJsonSuccessResponse(w,http.StatusOK,"Fetched user by email succesfully",user)
-	w.Write([]byte("Fetching all users"))
+
+	user, err := uc.UserService.GetUserByEmail(email)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusNotFound, "User not found", err)
+		return
+	}
+
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "Fetched user by email successfully", user)
 }
 
 func (uc *UserController) Login(w http.ResponseWriter,r *http.Request){
