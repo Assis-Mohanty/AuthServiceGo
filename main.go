@@ -7,7 +7,7 @@ import (
 
 func main(){
 	config.Load()
-	cnf:=app.NewConfig(":3000")
+	cnf:=app.NewConfig(":3004")
 	app:=app.NewApplication(cnf)
 	app.Run()
 }

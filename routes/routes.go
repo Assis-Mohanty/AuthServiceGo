@@ -18,6 +18,8 @@ func SetUpRouter(UserRouter Router) *chi.Mux {
 	router:=chi.NewRouter()
 	router.Use(middlewares.RateLimiterMiddleware)
 	router.HandleFunc("/fakestoreapiservice/*",utils.ReverseProxy("https://fakestoreapi.com","/fakestoreapiservice"))
+	router.HandleFunc("/hotelservice/*",utils.ReverseProxy("http://localhost:3000","/hotelservice"))
+
 	router.Get("/ping", controllers.PingHandler)
 	UserRouter.Register(router)
 	return router
