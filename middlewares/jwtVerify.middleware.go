@@ -1,9 +1,13 @@
 package middlewares
 
 import (
+	"authservice/config"
+	db "authservice/db/repository"
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -47,5 +51,33 @@ func JwtVerifyMiddleware(next http.Handler)http.Handler{
 		next.ServeHTTP(w,r.WithContext(cxt))
 
 
+	})
+}
+
+func RequireAllRoles(roles []string,next http.Handler)http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userIdStr,ok:=r.Context().Value("user_id").(string)
+		userId,err:= strconv.ParseInt(userIdStr,10,64)
+		if err!=nil || !ok{
+			http.Error(w,"Invalid user ID",http.StatusUnauthorized)
+			return
+		}
+		dbConn,dbErr:=config.SetUpDb()
+		if dbErr!=nil{
+			http.Error(w,"Database connection error",http.StatusInternalServerError)
+			return
+		}
+		urr:=db.NewUserRoleRepository(dbConn)
+		hasAllRoles,hasAllRolesErr:=urr.HasAllRoles(userId,roles)
+		if hasAllRolesErr!=nil{
+			http.Error(w,"Error checking user roles:"+hasAllRolesErr.Error(),http.StatusInternalServerError)
+			return
+		}
+		if !hasAllRoles{
+			http.Error(w,"Forbidden: insufficient roles",http.StatusForbidden)
+			return
+		}
+		fmt.Println("User has all required roles:", roles)
+		next.ServeHTTP(w,r)
 	})
 }

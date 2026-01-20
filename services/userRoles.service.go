@@ -11,6 +11,7 @@ type UserRoleService interface {
 	GetUserRoles(userId int64) ([]*models.UserRole, error)
 	GetUserPermissions(userId int64) ([]*models.Permission, error)
 	HasPermission(userId int64, resource string, action string) (bool, error)
+	HasRole(userId int64, roleId int64) (bool, error)
 }
 type UserRoleServiceImpl struct {
 	userRoleRepository db.UserRoleRepository
@@ -36,4 +37,7 @@ func (u *UserRoleServiceImpl) GetUserPermissions(userId int64) ([]*models.Permis
 }
 func (u *UserRoleServiceImpl) HasPermission(userId int64, resource string, action string) (bool, error) {
 	return u.userRoleRepository.HasPermission(userId, resource, action)
+}
+func (u *UserRoleServiceImpl) HasRole(userId int64, roleId int64) (bool, error) {
+	return u.userRoleRepository.HasRole(userId, roleId)
 }

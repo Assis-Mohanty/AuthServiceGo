@@ -1,4 +1,5 @@
 package db
+
 import (
 	"authservice/models"
 	"database/sql"
@@ -10,6 +11,7 @@ type UserRoleRepository interface {
 	GetUserPermissions(userId int64) ([]*models.Permission, error)
 	HasPermission(userId int64, resource string, action string) (bool, error)
 	HasRole(userId int64, roleId int64) (bool, error)
+	HasAllRoles(userId int64, roleNames []string) (bool, error)
 }
 type UserRoleRepositoryImpl struct {
 	db *sql.DB
@@ -116,4 +118,22 @@ func (ur *UserRoleRepositoryImpl) HasRole(userId int64, roleId int64) (bool, err
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (ur *UserRoleRepositoryImpl) HasAllRoles(userId int64, roleNames []string) (bool, error) {
+	query := `
+	SELECT COUNT(DISTINCT r.name)
+	FROM roles r
+	JOIN user_roles ur ON r.id = ur.role_id
+	WHERE ur.user_id = ? AND r.name IN  (?)
+	Group BY ur.user_id`
+	row := ur.db.QueryRow(query, len(roleNames), userId, roleNames)
+	var hasAllRoles bool
+	if err := row.Scan(&hasAllRoles); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+	return hasAllRoles, nil
 }
