@@ -32,3 +32,13 @@ type CreateRequestType struct{
 	Email string `json:"email" validate:"required,email"`
 	Password string `json:"password"`
 }
+type CreateRequestTypeWithOutPassowrd struct{
+	Username string `json:"username"`
+	Email string `json:"email" validate:"required,email"`
+}
+
+type UserCreationResponse struct {
+	To string 
+	Subject string
+	Body CreateRequestTypeWithOutPassowrd
+}

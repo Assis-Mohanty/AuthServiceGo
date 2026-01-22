@@ -1,6 +1,7 @@
 package app
 
 import (
+	dbConfig "authservice/config/db"
 	"authservice/controllers"
 	repo "authservice/db/repository"
 	"authservice/routes"
@@ -8,7 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	dbConfig "authservice/config/db"
+
 )
 
 type Config struct{
@@ -41,8 +42,8 @@ func (app *Application) Run() error{
 	fmt.Println("Starting server on",app.Config.Address)
 	ur:=repo.NewUserRepository(db)
 	fmt.Println("qqqq")
-
-	us:=services.NewUserService(ur)
+	urr:=repo.NewUserRoleRepository(db)
+	us:=services.NewUserService(ur,urr)
 	uc:=controllers.NewUserController(us)
 	uRouter:=routes.NewUserRouter(uc)
 	rr:=repo.NewRoleRepository(db)
@@ -53,12 +54,17 @@ func (app *Application) Run() error{
 	ps:=services.NewPermissionService(pr)
 	pc:=controllers.NewPermissionController(ps)
 	pRouter:=routes.NewPermissionRouter(pc)
+	urs:=services.NewUserRoleService(urr)
+	urc:=controllers.NewUserRoleController(urs)
+	urRouter:=routes.NewUserRolesRouter(urc)
+
 	server:=&http.Server{
 		Addr: app.Config.Address,
-		Handler: routes.SetUpRouter(uRouter,rRouter,pRouter),
+		Handler: routes.SetUpRouter(uRouter,rRouter,pRouter,urRouter),
 		ReadTimeout: 10 *time.Second,
 		WriteTimeout: 10 *time.Second,
 	}
+
 	return server.ListenAndServe()
 }
 

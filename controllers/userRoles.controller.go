@@ -4,8 +4,11 @@ import (
 	"authservice/models"
 	"authservice/services"
 	"authservice/utils"
+	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type UserRoleController struct {
@@ -19,6 +22,7 @@ func NewUserRoleController(_userRoleService services.UserRoleService) *UserRoleC
 }
 
 func (urc *UserRoleController) AssignRoleToUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("controller reached ")
 	var req *models.UserRoleRequest
 	err:= utils.ReadJson(r, &req)
 	if err != nil {
@@ -60,7 +64,7 @@ func (urc *UserRoleController) RemoveRoleFromUser(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusNoContent)
 }
 func (urc *UserRoleController) GetUserRoles(w http.ResponseWriter, r *http.Request) {
-	userIdStr := r.PathValue("userid")
+	userIdStr := chi.URLParam(r,"userid")
 	if userIdStr == "" {
 		http.Error(w, "userid query parameter is required", http.StatusBadRequest)
 		return

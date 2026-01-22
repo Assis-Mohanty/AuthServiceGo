@@ -23,11 +23,13 @@ type UserService interface {
 
 type UserServiceImpl struct {
 	userRepository db.UserRepository
+	userRoleRepository db.UserRoleRepository
 }
 
-func NewUserService(_userRepository db.UserRepository) UserService{
+func NewUserService(_userRepository db.UserRepository, _userRoleRepository db.UserRoleRepository) UserService{
 	return &UserServiceImpl{
 		userRepository: _userRepository,
+		userRoleRepository: _userRoleRepository,
 	}
 }
 
@@ -40,8 +42,17 @@ func (u *UserServiceImpl) Create(username string,email string,password string) (
 	if err != nil {
 		return nil, err
 	}
-	return u.userRepository.Create(username,email,string(hashedPassword))
-
+	utils.AddToMessageQueue(username,email)
+	fmt.Println("Added email and username to queue")
+	user,err:=u.userRepository.Create(username,email,string(hashedPassword))
+	if err != nil {
+		return nil, err
+	}
+	_,err=u.userRoleRepository.AssignRoleToUser(user.Id,2)
+	if err != nil {
+		return nil, err
+	}
+	return user,nil
 }
 
 func (u *UserServiceImpl) GetAllUsers() ([]*models.User,error){

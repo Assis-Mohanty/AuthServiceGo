@@ -7,11 +7,7 @@ import (
 	"net/http"
 )
 
-type loginkeyStruct struct{}
-var LoginKeyStruct =loginkeyStruct{}
 
-type createRequestkeyStruct struct{}
-var  CreateRequestkeyStruct=createRequestkeyStruct{}
 
 func UserLoginMiddleware(next http.Handler) http.Handler{
 	return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
@@ -25,7 +21,7 @@ func UserLoginMiddleware(next http.Handler) http.Handler{
 			utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Validation failed",validatorErr)
 			return
 		}
-		cxt:=context.WithValue(r.Context(),LoginKeyStruct,req)
+		cxt:=context.WithValue(r.Context(),utils.LoginKeyStruct,req)
 		next.ServeHTTP(w,r.WithContext(cxt))
 	})
 }
@@ -42,7 +38,7 @@ func UserCreateMiddleware(next http.Handler) http.Handler{
 			utils.WriteJsonErrorResponse(w,http.StatusBadRequest,"Validation failed",validatorErr)
 			return
 		}
-		cxt:=context.WithValue(r.Context(),CreateRequestkeyStruct,req)
+		cxt:=context.WithValue(r.Context(),utils.CreateRequestkeyStruct,req)
 		next.ServeHTTP(w,r.WithContext(cxt))
 	})
 }

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"authservice/middlewares"
 	"authservice/models"
 	"authservice/services"
 	"authservice/utils"
@@ -48,7 +47,7 @@ func (uc *UserController) GetUserById(w http.ResponseWriter,r *http.Request){
 
 
 func (uc *UserController) Create(w http.ResponseWriter,r *http.Request){
-	req,ok:=r.Context().Value(middlewares.CreateRequestkeyStruct).(*models.CreateRequestType)
+	req,ok:=r.Context().Value(utils.CreateRequestkeyStruct).(*models.CreateRequestType)
 	if !ok || req==nil{
 		http.Error(w,"Creating user failed , invalid body",http.StatusBadRequest)
 	}
@@ -93,7 +92,7 @@ func (uc *UserController) DeleteById(w http.ResponseWriter,r *http.Request){
 
 
 func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
-	email, ok := r.Context().Value(middlewares.JwtContextKey).(string)
+	email, ok := r.Context().Value(utils.JwtContextKey).(string)
 	if !ok || email == "" {
 		utils.WriteJsonErrorResponse(w, http.StatusUnauthorized, "Invalid or missing email in token", nil)
 		return
@@ -111,7 +110,7 @@ func (uc *UserController) GetUserByEmail(w http.ResponseWriter,r *http.Request){
 func (uc *UserController) Login(w http.ResponseWriter,r *http.Request){
 	fmt.Println("asda")
 	
-	req,ok:=r.Context().Value(middlewares.LoginKeyStruct).(*models.LoginRequestType)
+	req,ok:=r.Context().Value(utils.LoginKeyStruct).(*models.LoginRequestType)
 	if !ok || req==nil{
 		http.Error(w,"Creating user failed , invalid body",http.StatusBadRequest)
 	}

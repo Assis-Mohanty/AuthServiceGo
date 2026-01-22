@@ -18,10 +18,10 @@ func NewUserRouter(_userController *controllers.UserController) Router{
 }
 
 func (ur *UserRouter) Register(r *chi.Mux){
-	r.Get("/profile/{id}",ur.userController.GetUserById)
+	r.With(middlewares.RequireAnyRole("admin")).Get("/profile/{id}",ur.userController.GetUserById)
 	r.With(middlewares.UserCreateMiddleware).Post("/create",ur.userController.Create)
 	r.Get("/getallprofiles",ur.userController.GetAllUsers)
 	r.Delete("/profile/{id}",ur.userController.DeleteById)
-	r.With(middlewares.JwtVerifyMiddleware).Get("/getbyemail",ur.userController.GetUserByEmail)
+	r.With(middlewares.JwtVerifyMiddleware,middlewares.RequireAnyRoleJwtAuth("admin")).Get("/getbyemail",ur.userController.GetUserByEmail)
 	r.With(middlewares.UserLoginMiddleware).Post("/verify",ur.userController.Login)
 }

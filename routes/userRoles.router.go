@@ -2,6 +2,7 @@ package routes
 
 import (
 	"authservice/controllers"
+	"authservice/middlewares"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -15,12 +16,11 @@ func NewUserRolesRouter(_userRolesController *controllers.UserRoleController) Ro
 		userRolesController: _userRolesController,
 	}
 }
-
 func (urr *UserRolesRouter) Register(r *chi.Mux) {
+	r.With(middlewares.JwtVerifyMiddleware,middlewares.RequireAnyRoleJwtAuth("admin")).Post("/userroles", urr.userRolesController.AssignRoleToUser)
+	r.Delete("/userroles", urr.userRolesController.RemoveRoleFromUser)
 	r.Get("/userroles/{userid}", urr.userRolesController.GetUserRoles)
 	r.Get("/userpermissions/{userid}", urr.userRolesController.GetUserPermissions)
-	r.Get("/userhaspermission/", urr.userRolesController.HasPermission)
-	r.Get("/userhasrole/", urr.userRolesController.HasRole)
-	r.Post("/userroles", urr.userRolesController.AssignRoleToUser) 
-	r.Delete("/userroles/", urr.userRolesController.RemoveRoleFromUser)
+	r.Post("/userhaspermission", urr.userRolesController.HasPermission)
+	r.Post("/userhasrole", urr.userRolesController.HasRole)
 }

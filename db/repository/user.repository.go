@@ -1,10 +1,10 @@
 package db
 
 import (
+
 	"authservice/models"
 	"database/sql"
 	"fmt"
-
 )
 
 // import "database/sql"
@@ -66,6 +66,7 @@ func (u *UserRepositoryImpl) Create(username string,email string,password string
 		Password: password,
 	}
 	fmt.Println("User created",user.Id,user.Username,user.Email,user.Password)
+
 	return user,nil
 }
 
